@@ -11,8 +11,8 @@ from Bio import SeqIO
 
 def load_data(args):
     composition, contig_lengths = load_composition(
-        args.composition_file, 
-        args.kmer_length, 
+        args.composition_file,
+        args.kmer_length,
         args.length_threshold
         )
 
@@ -45,8 +45,8 @@ def _calculate_composition(comp_file, length_threshold, kmer_len):
         # Create a list containing all kmers, translated to integers
         kmers = [
                 feature_mapping[kmer_tuple]
-                for kmer_tuple 
-                in window(seq.seq.tostring().upper(), kmer_len)
+                for kmer_tuple
+                in window(str(seq.seq).upper(), kmer_len)
                 if kmer_tuple in feature_mapping
                 ]
         # numpy.bincount returns an array of size = max + 1
@@ -65,7 +65,7 @@ def _calculate_composition(comp_file, length_threshold, kmer_len):
 def load_composition(comp_file, kmer_len, threshold):
     #Composition
     composition, contig_lengths = _calculate_composition(
-            comp_file, 
+            comp_file,
             threshold,
             kmer_len
             )
@@ -73,7 +73,7 @@ def load_composition(comp_file, kmer_len, threshold):
     #Normalize kmer frequencies to remove effect of contig length
     #log(p_ij) = log[(X_ij +1) / rowSum(X_ij+1)]
     composition = np.log(composition.divide(composition.sum(axis=1),axis=0))
-    
+
     logging.info('Successfully loaded composition data.')
     return composition, contig_lengths
 
@@ -101,7 +101,7 @@ def load_coverage(cov_file, contig_lengths, no_cov_normalization, add_total_cove
     if add_total_coverage:
         cov['total_coverage'] = cov.ix[:,cov_range[0]:cov_range[1]].sum(axis=1)
         temp_cov_range = (cov_range[0],'total_coverage')
-    
+
     if not no_cov_normalization:
         # Normalize contigs next
         cov.ix[:,cov_range[0]:cov_range[1]] = \
@@ -116,7 +116,7 @@ def load_coverage(cov_file, contig_lengths, no_cov_normalization, add_total_cove
 
     logging.info('Successfully loaded coverage data.')
     return cov, cov_range
-    
+
 def _normalize_per_sample(arr):
     """ Divides respective column of arr with its sum. """
     return arr.divide(arr.sum(axis=0),axis=1)
@@ -124,7 +124,7 @@ def _normalize_per_sample(arr):
 def _normalize_per_contig(arr):
     """ Divides respective row of arr with its sum. """
     return arr.divide(arr.sum(axis=1),axis=0)
-    
+
 
 def generate_feature_mapping(kmer_len):
     BASE_COMPLEMENT = {"A":"T","T":"A","G":"C","C":"G"}
